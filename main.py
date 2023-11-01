@@ -53,11 +53,18 @@ def start_simulation():
     label.pack()
     create_gif_from_latest_pngs(delay,label,secondary)
 
-# Reste du code inchangé
+
 
 # main window
 root = tk.Tk()
 root.title("Simulation generator of CFD using LBM method")
+
+# Mesurez la taille du titre
+title_width = root.winfo_reqwidth()*3
+title_height = root.winfo_reqheight()
+
+# Définissez la taille de la fenêtre principale en fonction de la taille du titre
+root.geometry(f"{title_width}x{title_height}")
 
 # Entry for tunnel width
 width_label = tk.Label(root, text="Tunnel width:")

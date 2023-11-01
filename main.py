@@ -34,6 +34,7 @@ def create_gif_from_latest_pngs(delay,label,secondary,image_index=0):
     label.config(image=photo)
     label.image = photo
 
+
     # Planifier l'affichage de la prochaine image
     secondary.after(delay,create_gif_from_latest_pngs, delay,label,secondary, image_index + 1)
 

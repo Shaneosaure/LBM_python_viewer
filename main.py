@@ -1,33 +1,29 @@
 # Basic imports
 import os
 import sys
+import threading
+import queue
+import subprocess
+from pathlib import Path
 
 # Tkinter imports
 import tkinter as tk
 from tkinter import scrolledtext
 from PIL import Image, ImageTk
 
-# Multitasking imports
-import subprocess
-import threading
-import queue
-
-
-def create_gif_from_latest_pngs(delay, label, secondary, image_index=0):
-    parent_folder = "./results"
-    subfolders = [os.path.join(parent_folder, d) for d in os.listdir(parent_folder) if os.path.isdir(os.path.join(parent_folder, d))]
-    subfolders.sort(key=lambda x: os.path.getctime(x), reverse=True)
+def create_gif_from_latest_pngs(delay, label, secondary, parent_folder="./results", image_index=0):
+    parent_folder = Path(parent_folder)
+    subfolders = sorted((d for d in parent_folder.iterdir() if d.is_dir()), key=lambda x: x.stat().st_ctime, reverse=True)
 
     if not subfolders:
         print("No subfolders found in the parent directory.")
         return
 
     latest_folder = subfolders[0]
-    input_folder = os.path.join(latest_folder, "png")
+    input_folder = latest_folder / "png"
 
     # Load all PNG images from the folder
-    png_files = [filename for filename in os.listdir(input_folder) if filename.endswith(".png")]
-    png_files.sort(key=lambda x: int(''.join(filter(str.isdigit, x))))
+    png_files = sorted((filename for filename in input_folder.iterdir() if filename.suffix == ".png"), key=lambda x: int(''.join(filter(str.isdigit, x.name))))
 
     if not png_files:
         print(f"No PNG images found in the folder '{input_folder}'.")
@@ -36,7 +32,7 @@ def create_gif_from_latest_pngs(delay, label, secondary, image_index=0):
     if image_index >= len(png_files):
         image_index = 0
 
-    image_path = os.path.join(input_folder, png_files[image_index])
+    image_path = png_files[image_index]
     img = Image.open(image_path)
     img = img.resize((1600, 356))  # Adjust the image size as needed
     photo = ImageTk.PhotoImage(img)
@@ -46,14 +42,12 @@ def create_gif_from_latest_pngs(delay, label, secondary, image_index=0):
     label.image = photo
 
     # Schedule the display of the next image
-    secondary.after(delay, create_gif_from_latest_pngs, delay, label, secondary, image_index + 1)
-
+    secondary.after(delay, create_gif_from_latest_pngs, delay, label, secondary, parent_folder, image_index + 1)
 
 def enqueue_output(out, queue):
     for line in iter(out.readline, b''):
         queue.put(line)
     out.close()
-
 
 def show_realtime_output(command):
     # Create a new window to display real-time output
@@ -63,6 +57,9 @@ def show_realtime_output(command):
     # Add a scrolling text widget to display real-time output
     output_text = scrolledtext.ScrolledText(output_window, wrap=tk.WORD, width=80, height=20)
     output_text.pack(expand=True, fill='both')
+
+    # Display a preliminary message
+    output_text.insert(tk.END, "The simulation is running. Please wait for the output. This may take a few seconds...\n\n")
 
     # Use subprocess.PIPE to capture standard output in real-time
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1, universal_newlines=True)
@@ -107,20 +104,17 @@ def show_realtime_output(command):
     # Set on_close function as the closing handler for the secondary window
     output_window.protocol("WM_DELETE_WINDOW", on_close)
 
-
 def execute_command(simulation_type_var):
     # Build the command with the simulation type
-    command = f"python lbm/start.py {simulation_type_var}" 
+    command = f"python lbm/start.py {simulation_type_var}"
 
     # Display the output in real-time in a secondary window
     show_realtime_output(command)
-
 
 def start_simulation(simulation_type_var):
     # Create a thread to run the command in the background
     thread = threading.Thread(target=execute_command, args=(simulation_type_var,))
     thread.start()
-
 
 def show_result():
     # Delay between each image (in milliseconds)
@@ -134,7 +128,6 @@ def show_result():
     label.pack()
     create_gif_from_latest_pngs(delay, label, secondary)
 
-
 def kill_subprocess(process):
     try:
         process.terminate()
@@ -142,7 +135,6 @@ def kill_subprocess(process):
     except subprocess.TimeoutExpired:
         process.kill()
         process.wait()
-
 
 # Main function
 def main():
@@ -183,7 +175,6 @@ def main():
     result_button.pack()
 
     root.mainloop()
-
 
 # Call the main function if the script is run directly
 if __name__ == "__main__":

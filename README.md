@@ -50,8 +50,10 @@ python main.py
 ```
 
 ### Running example
+<p align="center">
+  <img alt="" src="./Demo/demo.gif">
+</p>
 
-[Running example](./Demo/demo.gif)
 
 ## Source
 

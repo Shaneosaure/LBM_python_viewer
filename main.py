@@ -78,7 +78,7 @@ def show_realtime_output(command):
     exit_event = threading.Event()
 
     # Create a thread to put output lines into the queue
-    output_thread = threading.Thread(target=enqueue_output, args=(process.stdout, output_queue,exit_event))
+    output_thread = threading.Thread(target=enqueue_output, args=(process.stdout, output_queue, exit_event))
     output_thread.daemon = True  # The thread terminates when the main program ends
     output_thread.start()
 
@@ -97,7 +97,7 @@ def show_realtime_output(command):
             output_text.yview(tk.END)  # Scroll down to see the latest output
         else:
             # Display the final output
-            if process.returncode==0:
+            if process.returncode == 0:
                 output_text.insert(tk.END, f"\n\nSimulation finished with success !")
             else: 
                 output_text.insert(tk.END, f"\n\nSimulation finished with an error, exit code: {process.returncode}")

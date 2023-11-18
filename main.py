@@ -87,14 +87,14 @@ def show_realtime_output(command):
 
         if process.poll() is None:
             # If the process is not finished, schedule the next update
-            output_text.after(50, update_output)
+            output_text.after(300, update_output)
         else:
             # Display the exit code in the text widget
             output_text.insert(tk.END, f"\n\nProcess finished with exit code {process.returncode}")
             output_text.configure(state='disabled')  # Make the text area read-only
 
     # Schedule the first update of the output
-    output_text.after(50, update_output)
+    output_text.after(300, update_output)
 
     # Function to kill the process when the secondary window is closed
     def on_close():

@@ -76,7 +76,7 @@ def show_realtime_output(command):
 
     # Create an event to signal the thread to exit
     exit_event = threading.Event()
-    
+
     # Create a thread to put output lines into the queue
     output_thread = threading.Thread(target=enqueue_output, args=(process.stdout, output_queue,exit_event))
     output_thread.daemon = True  # The thread terminates when the main program ends
@@ -155,7 +155,7 @@ def main():
     root.geometry(f"{title_width}x{title_height}")
 
     # Options for the dropdown menu
-    simulation_types = ["array", "cavity", "poiseuille", "step"]
+    simulation_types = ["array","vent", "cavity", "poiseuille", "step","turek"]
     selected_simulation_type = tk.StringVar(value=simulation_types[0])
 
     # Label and dropdown menu for the simulation type

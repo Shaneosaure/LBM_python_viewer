@@ -44,9 +44,13 @@ def create_gif_from_latest_pngs(delay, label, secondary, parent_folder="./result
     # Schedule the display of the next image
     secondary.after(delay, create_gif_from_latest_pngs, delay, label, secondary, parent_folder, image_index + 1)
 
-def enqueue_output(out, queue):
+def enqueue_output(out, queue, exit_event):
     for line in iter(out.readline, b''):
-        queue.put(line)
+        if line != '':
+            queue.put(line)
+            if exit_event.is_set():  # Check if the exit event is set
+                break  # Exit the loop if the event is set
+
     out.close()
 
 def show_realtime_output(command):
@@ -58,47 +62,55 @@ def show_realtime_output(command):
     output_text = scrolledtext.ScrolledText(output_window, wrap=tk.WORD, width=80, height=20)
     output_text.pack(expand=True, fill='both')
 
-    # Display a preliminary message
-    output_text.insert(tk.END, "The simulation is running. Please wait for the output. This may take a few seconds...\n\n")
+    # Display initial message
+    output_text.insert(tk.END, "The simulation is running. Please wait for the output. This may take a few seconds...\n")
 
     # Use subprocess.PIPE to capture standard output in real-time
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1, universal_newlines=True)
-
+    
     # Store the process as an attribute of the secondary window
     output_window.process = process
 
     # Create a queue to store output lines
     output_queue = queue.Queue()
 
+    # Create an event to signal the thread to exit
+    exit_event = threading.Event()
+    
     # Create a thread to put output lines into the queue
-    output_thread = threading.Thread(target=enqueue_output, args=(process.stdout, output_queue))
+    output_thread = threading.Thread(target=enqueue_output, args=(process.stdout, output_queue,exit_event))
     output_thread.daemon = True  # The thread terminates when the main program ends
     output_thread.start()
 
     # Read the queue and display the output in real-time
     def update_output():
-        while True:
-            try:
+        try:
+            while True:
                 output_line = output_queue.get_nowait()
                 output_text.insert(tk.END, output_line)
-                output_text.yview(tk.END)  # Scroll down to see the latest output
-            except queue.Empty:
-                break
+        except queue.Empty:
+            pass
 
         if process.poll() is None:
             # If the process is not finished, schedule the next update
-            output_text.after(300, update_output)
+            output_text.after(50, update_output)
+            output_text.yview(tk.END)  # Scroll down to see the latest output
         else:
-            # Display the exit code in the text widget
-            output_text.insert(tk.END, f"\n\nProcess finished with exit code {process.returncode}")
+            # Display the final output
+            if process.returncode==0:
+                output_text.insert(tk.END, f"\n\nSimulation finished with success !")
+            else: 
+                output_text.insert(tk.END, f"\n\nSimulation finished with an error, exit code: {process.returncode}")
+            output_text.yview(tk.END)  # Scroll down to see the latest output
             output_text.configure(state='disabled')  # Make the text area read-only
 
     # Schedule the first update of the output
-    output_text.after(300, update_output)
-
+    output_text.after(50, update_output)
+   
     # Function to kill the process when the secondary window is closed
-    def on_close():
-        kill_subprocess(output_window.process)
+    def on_close(): 
+        exit_event.set()
+        output_window.process.kill()
         output_window.destroy()
 
     # Set on_close function as the closing handler for the secondary window
@@ -128,13 +140,6 @@ def show_result():
     label.pack()
     create_gif_from_latest_pngs(delay, label, secondary)
 
-def kill_subprocess(process):
-    try:
-        process.terminate()
-        process.wait(timeout=0.1)
-    except subprocess.TimeoutExpired:
-        process.kill()
-        process.wait()
 
 # Main function
 def main():

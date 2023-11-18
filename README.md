@@ -49,6 +49,10 @@ Explain how to use your project, providing examples and details about key featur
 python main.py
 ```
 
+### Running example
+
+[Running example](./Demo/demo.gif)
+
 ## Source
 
 This project is using the submodule "lbm," which is a fork of the existing project [https://github.com/jviquerat/lbm](https://github.com/jviquerat/lbm)

@@ -27,10 +27,10 @@ jobs:
     - name: Build executable with PyInstaller
       run: |
         pyinstaller --noconsole --onefile main.py
-          
+
     - name: Move main.exe to Inno Setup directory
-        run: |
-          mv dist/main.exe installer_script_directory/
+      run: |
+        mv dist/main.exe installer_script_directory/
 
     - name: Run Inno Setup
       run: |

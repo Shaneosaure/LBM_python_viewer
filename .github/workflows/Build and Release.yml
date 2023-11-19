@@ -34,7 +34,6 @@ jobs:
         
     - name: Clean up files and folders
       run: |
-        rm -r .git 
         rm -r lbm/.github/ 
         rm -r lbm/lbm/save 
         rm -r lbm/lbm/__pycache__

@@ -34,8 +34,7 @@ jobs:
         
     - name: Clean up files and folders
       run: |
-        rm -r lbm/.github/ 
-        rm -r lbm/lbm/save 
+        rm -r .github Demo lbm/.github lbm/lbm/save 
         rm .gitignore 
         rm .gitmodules 
         rm LICENSE.md 

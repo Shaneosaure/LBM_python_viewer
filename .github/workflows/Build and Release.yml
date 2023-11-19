@@ -34,7 +34,12 @@ jobs:
         
     - name: Clean up files and folders
       run: |
-        rm -r .github Demo lbm/.github lbm/lbm/save 
+        rm -r .github 
+        rm -r Demo 
+        rm -r lbm/.github 
+        rm -r lbm/lbm/save 
+        rm -r build/
+        rm -r dist/
         rm .gitignore 
         rm .gitmodules 
         rm LICENSE.md 
@@ -47,10 +52,9 @@ jobs:
 
     - name: Run Inno Setup
       run: |
-        iscc /O"output_directory" "installer_script.iss"
+        iscc "installer_script.iss"
 
     - name: Upload Inno Setup Artifact
       uses: actions/upload-artifact@v3
       with:
         name: lbm-setup
-        path: output_directory

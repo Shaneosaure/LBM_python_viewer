@@ -3,7 +3,7 @@
 
 #define MyAppName "LBM_python_viewer"
 #define MyAppVersion "0.1"
-#define MyAppPublisher "Stéphane SIMON"
+#define MyAppPublisher "StÃ©phane SIMON"
 #define MyAppURL "https://github.com/Shaneosaure/LBM_python_viewer"
 #define MyAppExeName "main.exe"
 #define MyAppAssocName MyAppName + " File"
@@ -24,7 +24,7 @@ DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 LicenseFile=LICENSE.txt
 PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
+PrivilegesRequiredOverridesAllowed=commandline
 OutputDir=Output
 OutputBaseFilename=LBM_python_viewer
 SetupIconFile=logo.ico

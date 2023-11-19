@@ -117,8 +117,11 @@ def show_realtime_output(command):
     output_window.protocol("WM_DELETE_WINDOW", on_close)
 
 def execute_command(simulation_type_var):
+    # Actual running python path
+    python_executable = sys.executable
+
     # Build the command with the simulation type
-    command = f"python lbm/start.py {simulation_type_var}"
+    command = f"{python_executable} lbm/start.py {simulation_type_var}"
 
     # Display the output in real-time in a secondary window
     show_realtime_output(command)

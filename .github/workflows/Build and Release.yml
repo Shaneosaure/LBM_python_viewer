@@ -42,7 +42,7 @@ jobs:
         iscc /O"output_directory" "installer_script.iss"
 
     - name: Upload Inno Setup Artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: lbm-setup
         path: output_directory

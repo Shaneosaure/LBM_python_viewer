@@ -34,7 +34,7 @@ jobs:
         
     - name: Clean up files and folders
       run: |
-        Remove-Item -Recurse -Force .git Demo lbm/.github lbm/lbm/save lbm/lbm/__pycache__
+        Remove-Item -Recurse -Force .git/ Demo/ lbm/.github lbm/lbm/save lbm/lbm/__pycache__
         Remove-Item .gitignore .gitmodules LICENSE.md logo.jpg test.py README.md lbm/.gitignore lbm/LICENSE lbm/README.md 
 
     - name: Run Inno Setup

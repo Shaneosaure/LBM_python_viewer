@@ -34,7 +34,7 @@ jobs:
 
     - name: Run Inno Setup
       run: |
-        iscc "installer_script.iss"
+        iscc /O"output_directory" "installer_script.iss"
 
     - name: Upload Inno Setup Artifact
       uses: actions/upload-artifact@v2

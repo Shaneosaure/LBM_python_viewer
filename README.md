@@ -1,4 +1,5 @@
 # Project Name
+[![Build and Release](https://github.com/Shaneosaure/LBM_python_viewer/actions/workflows/Build%20and%20Release.yml/badge.svg)](https://github.com/Shaneosaure/LBM_python_viewer/actions/workflows/Build%20and%20Release.yml)
 
 The LBM Python Viewer is a Python GUI application utilizing Tkinter to generate and visualize Computational Fluid Dynamics (CFD) simulations with the Lattice Boltzmann Method (LBM). The tool offers a user-friendly interface for creating and visualizing LBM simulations, supporting both preset and customizable scenarios. Simulations are presented through GIF animations.
 

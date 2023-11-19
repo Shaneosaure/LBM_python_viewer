@@ -28,21 +28,14 @@ jobs:
       run: |
         pyinstaller --noconsole --onefile main.py
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: lbm-exe
-        path: dist
-
-  release:
-    needs: build
-    runs-on: windows-latest
-
-    steps:
-    - name: Download artifacts
-      uses: actions/download-artifact@v2
-      with:
-        name: lbm-exe
+    - name: Move main.exe to Inno Setup directory
+      run: |
+        mv dist/main.exe .
+        
+    - name: Clean up files and folders
+      run: |
+        Remove-Item -Recurse -Force .\.git .\Demo .\lbm\.github .\lbm\lbm\save .\lbm\lbm\__pycache__
+        Remove-Item .gitignore .gitmodules LICENSE.md logo.jpg test.py README.md lbm/.gitignore lbm/LICENSE lbm/README.md 
 
     - name: Run Inno Setup
       run: |

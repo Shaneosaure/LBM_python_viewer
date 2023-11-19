@@ -36,7 +36,15 @@ jobs:
       run: |
         rm -r lbm/.github/ 
         rm -r lbm/lbm/save 
-        rm .gitignore .gitmodules LICENSE.md logo.jpg test.py README.md lbm/.gitignore lbm/LICENSE lbm/README.md 
+        rm .gitignore 
+        rm .gitmodules 
+        rm LICENSE.md 
+        rm logo.jpg 
+        rm test.py 
+        rm README.md 
+        rm lbm/.gitignore 
+        rm lbm/LICENSE 
+        rm lbm/README.md 
 
     - name: Run Inno Setup
       run: |

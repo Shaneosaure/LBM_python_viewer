@@ -16,6 +16,17 @@ This project has been tested using Python 3.11
 
 ## Installation
 
+### With setup.exe
+
+If you want to install the project easily, you can use the installer provided in releases tab.
+
+You need to run the following command after the installation is done:
+```bash
+pip install -r https://raw.githubusercontent.com/Shaneosaure/lbm/master/requirements.txt
+```
+
+### From source
+
 To set up the LBM Python Viewer, follow these steps:
 
 1. Clone the project repository:

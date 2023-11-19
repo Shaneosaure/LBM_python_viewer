@@ -23,7 +23,7 @@ If you want to install the project easily, you can use the installer provided in
 
 You need to run the following command after the installation is done:
 ```bash
-pip install -r https://raw.githubusercontent.com/Shaneosaure/lbm/5f9b193b66a3be9ac94f361334e2de69732e069f/requirements.txt
+pip install -r https://raw.githubusercontent.com/Shaneosaure/lbm/master/requirements.txt
 ```
 
 ### From source

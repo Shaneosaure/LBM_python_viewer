@@ -30,7 +30,7 @@ jobs:
 
     - name: Move main.exe to Inno Setup directory
       run: |
-        mv dist/main.exe installer_script_directory/
+        mv dist/main.exe .
 
     - name: Run Inno Setup
       run: |

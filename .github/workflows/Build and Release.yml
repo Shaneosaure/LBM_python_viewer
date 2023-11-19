@@ -46,4 +46,10 @@ jobs:
 
     - name: Run Inno Setup
       run: |
-        iscc /O"output_directory" /F"input_script.iss"
+        iscc /O"output_directory" /F"installer_script.iss"
+
+    - name: Upload Inno Setup Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: lbm-setup
+        path: output_directory

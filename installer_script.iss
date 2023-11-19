@@ -62,6 +62,7 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
-Type: filesandordirs; Name: "{app}\lbm\*.*"; Flags: recursesubdirs
-Type: filesandordirs; Name: "{app}\results\*.*"; Flags: recursesubdirs
+Type: filesandordirs; Name: "{app}\lbm\*.*"
+Type: filesandordirs; Name: "{app}\results\*.*"
+
 

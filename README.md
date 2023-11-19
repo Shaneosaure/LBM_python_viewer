@@ -15,16 +15,18 @@ The LBM Python Viewer is a Python GUI application utilizing Tkinter to generate 
 
 This project has been tested using Python 3.11
 
-## Installation with setup.exe
+## Installation
 
-If you want to install the project easily, you use the installer provided in releases tab.
+### With setup.exe
+
+If you want to install the project easily, you can use the installer provided in releases tab.
+
 You need to run the following command after the installation is done:
-
 ```bash
 pip install -r https://raw.githubusercontent.com/Shaneosaure/lbm/5f9b193b66a3be9ac94f361334e2de69732e069f/requirements.txt
 ```
 
-## Installation from source
+### From source
 
 To set up the LBM Python Viewer, follow these steps:
 

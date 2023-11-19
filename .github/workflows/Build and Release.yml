@@ -57,5 +57,5 @@ jobs:
     - name: Upload Inno Setup Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: LBM_python_viewer-setup.exe
+        name: LBM_python_viewer-setup
         path: output_directory/LBM_python_viewer.exe

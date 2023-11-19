@@ -1,0 +1,50 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11
+
+    - name: Install dependencies
+      run: |
+        git submodule update --init
+        pip install -r lbm/requirements.txt
+        pip install pyinstaller
+
+    - name: Build executable with PyInstaller
+      run: |
+        pyinstaller --noconsole --onefile main.py
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: lbm-exe
+        path: dist
+
+  release:
+    needs: build
+    runs-on: windows-latest
+
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: lbm-exe
+
+    - name: Run Inno Setup
+      run: |
+        choco install inno-setup
+        iscc /O"output_directory" /F"input_script.iss"

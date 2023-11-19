@@ -33,19 +33,19 @@ jobs:
     - name: Move main.exe to Inno Setup directory
       run: |
         mv dist/main.exe .
+        mv Images/logo.ico .
         
     - name: Clean up files and folders
       run: |
         rm -r .github 
         rm -r Demo 
+        rm -r Images
         rm -r lbm/.github 
         rm -r lbm/lbm/save 
         rm -r build/
         rm -r dist/
         rm .gitignore 
         rm .gitmodules 
-        rm LICENSE.md 
-        rm logo.jpg 
         rm test.py 
         rm README.md 
         rm lbm/.gitignore 

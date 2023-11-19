@@ -8,6 +8,7 @@ The LBM Python Viewer is a Python GUI application utilizing Tkinter to generate 
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Troubleshooting](#troubleshooting)
 - [Source](#source)
 - [License](#license)
 
@@ -65,6 +66,14 @@ python main.py
   <img alt="" src="./Demo/demo.gif">
 </p>
 
+## Troubleshooting
+
+If you have the following error: 
+<p align="center">
+  <img alt="" src="./Images/error.png">
+</p>
+
+You need to install the dependencies using the command provided in [Instructions-with-setup.exe](#with-setupexe)
 
 ## Source
 

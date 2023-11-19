@@ -11,7 +11,7 @@ The LBM Python Viewer is a Python GUI application utilizing Tkinter to generate 
 
 ## Table of Contents
 
-- [Prerequisites](#prerequisites)g
+- [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Troubleshooting](#troubleshooting)

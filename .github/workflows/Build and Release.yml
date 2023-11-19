@@ -89,6 +89,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: LBM_python_viewer-setup/LBM_python_viewer.exe
+          asset_path: LBM_python_viewer.exe
           asset_name: LBM_python_viewer-setup-${{ github.ref }}.exe
           asset_content_type: application/zip

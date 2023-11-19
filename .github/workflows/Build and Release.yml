@@ -53,9 +53,9 @@ jobs:
     - name: Run Inno Setup
       run: |
         iscc "installer_script.iss"
-
+    
     - name: Upload Inno Setup Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: LBM_python_viewer.exe
+        name: LBM_python_viewer-setup
         path: LBM_python_viewer.exe

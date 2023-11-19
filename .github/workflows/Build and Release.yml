@@ -14,7 +14,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: 3.11
 
@@ -39,5 +39,10 @@ jobs:
 
     - name: Run Inno Setup
       run: |
-        choco install inno-setup
-        iscc /O"output_directory" /F"input_script.iss"
+        iscc /O"output_directory" "installer_script.iss"
+
+    - name: Upload Inno Setup Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: lbm-setup
+        path: output_directory

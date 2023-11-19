@@ -46,5 +46,4 @@ jobs:
 
     - name: Run Inno Setup
       run: |
-        choco install inno-setup
         iscc /O"output_directory" /F"input_script.iss"

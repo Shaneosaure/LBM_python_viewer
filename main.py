@@ -51,7 +51,7 @@ def enqueue_output(out, queue, exit_event):
             if exit_event.is_set():  # Check if the exit event is set
                 break  # Exit the loop if the event is set
 
-    out.close()
+    out.close() #close the function
 
 def show_realtime_output(command):
     # Create a new window to display real-time output

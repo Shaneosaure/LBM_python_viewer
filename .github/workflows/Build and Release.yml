@@ -69,7 +69,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Download Setup from build
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: LBM_python_viewer-setup
 

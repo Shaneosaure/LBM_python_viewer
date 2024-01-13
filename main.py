@@ -1,6 +1,7 @@
 # Basic imports
 import os
 import sysconfig
+import sys
 import threading
 import queue
 import subprocess
@@ -118,12 +119,12 @@ def show_realtime_output(command):
 
 def execute_command(simulation_type_var):
     # Actual running python path
-    print(sysconfig.get_config_var('base'))
-    # check os (windows or else)
-    if os.name=="nt":
-        python_executable = sysconfig.get_config_var('base') + "\python.exe"
-    else :
-        python_executable = sysconfig.get_config_var('base') + "/python"
+    print(sys.executable)
+
+    python_executable = sys.executable
+
+    with open('python_executable.txt', 'w') as file:
+        file.write(python_executable)
 
     # Build the command with the simulation type
     command = f"{python_executable} lbm/start.py {simulation_type_var}"

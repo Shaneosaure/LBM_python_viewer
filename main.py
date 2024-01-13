@@ -121,7 +121,7 @@ def execute_command(simulation_type_var):
     python_executable = sys.executable
 
     # Build the command with the simulation type
-    command = f"{python_executable} lbm/start.py {simulation_type_var}"
+    command = f"{python_executable} && {python_executable} lbm/start.py {simulation_type_var}"
 
     # Display the output in real-time in a secondary window
     show_realtime_output(command)

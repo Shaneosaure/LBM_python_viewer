@@ -33,8 +33,12 @@ def create_gif_from_latest_pngs(delay, label, secondary, parent_folder, image_in
     # Load all PNG images from the folder
     png_files = sorted((filename for filename in input_folder.iterdir() if filename.suffix == ".png"), key=lambda x: int(''.join(filter(str.isdigit, x.name))))
 
-    if not png_files:
-        print(f"No PNG images found in the folder '{input_folder}'.")
+    if not png_files:        
+        # Display a message when no images are found
+        label.config(text="Images not created yet, wait a few more seconds...")
+
+        # Schedule the next check after a delay
+        secondary.after(delay, create_gif_from_latest_pngs, delay, label, secondary, parent_folder, image_index)
         return
 
     if image_index >= len(png_files):
@@ -45,7 +49,7 @@ def create_gif_from_latest_pngs(delay, label, secondary, parent_folder, image_in
     try:
         img = Image.open(image_path)
     except Image.UnidentifiedImageError:
-        print(f"Error opening image '{image_path}'. Skipping...")
+        label.config(text=f"Error opening image '{image_path}'. Skipping...")
         img = None
 
     if img:
@@ -70,10 +74,16 @@ def show_realtime_output(simulation_type_var):
     # Create a new window to display real-time output
     output_window = tk.Toplevel()
     output_window.title(f"Realtime Command Output - {simulation_type_var}")
-    
+   
+    # Add a label above the scrolling text widget
+    label = tk.Label(output_window, text=f"Live Solving Output: {simulation_type_var}", font=("Helvetica", 12, "bold"))
+    label.pack(pady=10)  # Add some padding between the label and the text widget
+
+
     # Add a scrolling text widget to display real-time output
     output_text = scrolledtext.ScrolledText(output_window, wrap=tk.WORD, width=80, height=20)
     output_text.pack(expand=True, fill='both')
+
 
     # Display initial message
     output_text.insert(tk.END, "The simulation is running. Please wait for the output. This may take a few seconds...\n")
@@ -107,10 +117,6 @@ def show_realtime_output(simulation_type_var):
     # Retrieve the reference to ltc from the queue
     ltc = ltc_queue.get()
 
-    # Créer un bouton "Show result" dans la fenêtre de sortie
-    show_result_button = tk.Button(output_window, text="Show Result (slows down solving)", command=lambda: show_result(ltc.output_dir))
-    show_result_button.pack()
-
     # Read the queue and display the output in real-time
     def update_output():
         while not output_queue.empty():
@@ -129,6 +135,11 @@ def show_realtime_output(simulation_type_var):
                 output_text.insert(tk.END, f"\n\nSimulation finished with an error, exit code: {process.exitcode}")
             output_text.yview(tk.END)  # Scroll down to see the latest output
             output_text.configure(state='disabled')  # Make the text area read-only
+
+    # Créer un bouton "Show result" dans la fenêtre de sortie
+    show_result_button = tk.Button(output_window, text="Show Result (slows down solving)", command=lambda: show_result(ltc.output_dir,simulation_type_var))
+    # Créer un bouton "Show result" dans la fenêtre de sortie après une attente de 5 secondes
+    output_window.after(3000, lambda: show_result_button.pack())
 
     # Schedule the first update of the output
     output_text.after(50, update_output)
@@ -169,12 +180,12 @@ def start_simulation(simulation_type_var):
     thread = threading.Thread(target=show_realtime_output, args=(simulation_type_var,))
     thread.start()
 
-def show_result(path):
+def show_result(path,simulation_type_var):
     # Delay between each image (in milliseconds)
     delay = 50  # Change this value to adjust the animation speed
     # Create a secondary window to display images
     secondary = tk.Toplevel()
-    secondary.title("Simulation Result")
+    secondary.title(f"Simulation Result - {simulation_type_var}")
 
     # Label to display the images
     label = tk.Label(secondary)

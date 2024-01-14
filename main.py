@@ -25,16 +25,10 @@ class QueueAsFile(io.TextIOBase):
     def flush(self):
         pass  # Optional: if you need to flush
 
-def create_gif_from_latest_pngs(delay, label, secondary, parent_folder="./results", image_index=0):
-    parent_folder = Path(parent_folder)
-    subfolders = sorted((d for d in parent_folder.iterdir() if d.is_dir()), key=lambda x: x.stat().st_ctime, reverse=True)
-
-    if not subfolders:
-        print("No subfolders found in the parent directory.")
-        return
-
-    latest_folder = subfolders[0]
-    input_folder = latest_folder / "png"
+def create_gif_from_latest_pngs(delay, label, secondary, parent_folder, image_index=0):
+    
+    parent_folder=Path(parent_folder)
+    input_folder = parent_folder / "png"
 
     # Load all PNG images from the folder
     png_files = sorted((filename for filename in input_folder.iterdir() if filename.suffix == ".png"), key=lambda x: int(''.join(filter(str.isdigit, x.name))))
@@ -72,7 +66,6 @@ def enqueue_output(out_queue, display_queue, exit_event):
         if exit_event.is_set():
             break
 
-
 def show_realtime_output(simulation_type_var):
     # Create a new window to display real-time output
     output_window = tk.Toplevel()
@@ -85,12 +78,15 @@ def show_realtime_output(simulation_type_var):
     # Display initial message
     output_text.insert(tk.END, "The simulation is running. Please wait for the output. This may take a few seconds...\n")
 
+    # Create a queue to store the reference to ltc
+    ltc_queue = multiprocessing.Queue()
+
     # Créez deux queues pour la sortie standard et la sortie d'erreur
     stdout_queue = multiprocessing.Queue()
     stderr_queue = multiprocessing.Queue()
     
     # Use subprocess.PIPE to capture standard output in real-time
-    process = multiprocessing.Process(target=run_with_queues, args=(simulation_type_var, stdout_queue, stderr_queue),daemon=True)
+    process = multiprocessing.Process(target=run_with_queues, args=(simulation_type_var, stdout_queue, stderr_queue,ltc_queue),daemon=True)
 
     # Store the process as an attribute of the secondary window
     output_window.process = process
@@ -107,6 +103,13 @@ def show_realtime_output(simulation_type_var):
     output_thread.start()
 
     process.start()
+    
+    # Retrieve the reference to ltc from the queue
+    ltc = ltc_queue.get()
+
+    # Créer un bouton "Show result" dans la fenêtre de sortie
+    show_result_button = tk.Button(output_window, text="Show Result (slows down solving)", command=lambda: show_result(ltc.output_dir))
+    show_result_button.pack()
 
     # Read the queue and display the output in real-time
     def update_output():
@@ -139,7 +142,7 @@ def show_realtime_output(simulation_type_var):
     # Set on_close function as the closing handler for the secondary window
     output_window.protocol("WM_DELETE_WINDOW", on_close)
 
-def run_with_queues(simulation_type_var, stdout_queue, stderr_queue):
+def run_with_queues(simulation_type_var, stdout_queue, stderr_queue, ltc_queue):
     # Redirigez sys.stdout et sys.stderr vers les queues
     sys.stdout = QueueAsFile(stdout_queue)
     sys.stderr = QueueAsFile(stderr_queue)
@@ -150,6 +153,10 @@ def run_with_queues(simulation_type_var, stdout_queue, stderr_queue):
 
         # Instanciate lattice
         ltc = lattice(app)
+
+        # Mettez la référence de ltc dans la file de sortie
+        ltc_queue.put(ltc)
+
         # Appelez votre fonction run normalement
         run(ltc, app)
     finally:
@@ -162,7 +169,7 @@ def start_simulation(simulation_type_var):
     thread = threading.Thread(target=show_realtime_output, args=(simulation_type_var,))
     thread.start()
 
-def show_result():
+def show_result(path):
     # Delay between each image (in milliseconds)
     delay = 50  # Change this value to adjust the animation speed
     # Create a secondary window to display images
@@ -172,7 +179,7 @@ def show_result():
     # Label to display the images
     label = tk.Label(secondary)
     label.pack()
-    create_gif_from_latest_pngs(delay, label, secondary)
+    create_gif_from_latest_pngs(delay, label, secondary,path)
 
 
 # Main function
@@ -208,10 +215,6 @@ def main():
     # Button to start the simulation
     start_button = tk.Button(root, text="Start simulation", command=lambda: start_simulation(selected_simulation_type.get()))
     start_button.pack()
-
-    # Button to show the results of the simulation
-    result_button = tk.Button(root, text="Show result", command=show_result)
-    result_button.pack()
 
     root.mainloop()
 

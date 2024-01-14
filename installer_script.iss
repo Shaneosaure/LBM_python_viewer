@@ -2,8 +2,10 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "LBM_python_viewer"
-#define MyAppVersion "0.1"
-#define MyAppPublisher "Stéphane SIMON"
+#ifndef MyAppVersion
+    #define MyAppVersion "0"
+#endif
+#define MyAppPublisher "StÃ©phane SIMON"
 #define MyAppURL "https://github.com/Shaneosaure/LBM_python_viewer"
 #define MyAppExeName "main.exe"
 #define MyAppAssocName MyAppName + " File"

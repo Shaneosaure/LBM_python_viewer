@@ -25,12 +25,7 @@ This project has been tested using Python 3.11.x, so we recommend using this ver
 
 ### With setup.exe
 
-If you want to install the project easily, you can use the installer provided in releases tab.
-
-You need to run the following command after the installation is done:
-```bash
-pip install -r https://raw.githubusercontent.com/Shaneosaure/lbm/master/requirements.txt
-```
+Simply download and run the setup from [Release](https://github.com/Shaneosaure/LBM_python_viewer/releases/latest).
 
 ### From source
 
@@ -79,7 +74,10 @@ If you have the following error:
   <img alt="" src="./Images/error.png">
 </p>
 
-You need to install the dependencies using the command provided in [Instructions-with-setup.exe](#with-setupexe)
+You need to install the dependencies using the command :
+```bash
+pip install -r https://raw.githubusercontent.com/Shaneosaure/lbm/master/requirements.txt
+```
 
 ## Source
 

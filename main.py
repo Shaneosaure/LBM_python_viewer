@@ -3,13 +3,29 @@ import os
 import sys
 import threading
 import queue
-import subprocess
+import io
 from pathlib import Path
+import multiprocessing
 
 # Tkinter imports
 import tkinter as tk
 from tkinter import scrolledtext
 from PIL import Image, ImageTk
+
+# Custom imports
+from lbm.src.app.app      import *
+from lbm.src.core.lattice import *
+from lbm.src.core.run     import *
+
+class QueueAsFile(io.TextIOBase):
+    def __init__(self, queue):
+        self.queue = queue
+
+    def write(self, string):
+        self.queue.put(string)
+
+    def flush(self):
+        pass  # Optional: if you need to flush
 
 def create_gif_from_latest_pngs(delay, label, secondary, parent_folder="./results", image_index=0):
     parent_folder = Path(parent_folder)
@@ -33,27 +49,33 @@ def create_gif_from_latest_pngs(delay, label, secondary, parent_folder="./result
         image_index = 0
 
     image_path = png_files[image_index]
-    img = Image.open(image_path)
-    img = img.resize((1600, 356))  # Adjust the image size as needed
-    photo = ImageTk.PhotoImage(img)
+    
+    try:
+        img = Image.open(image_path)
+    except Image.UnidentifiedImageError:
+        print(f"Error opening image '{image_path}'. Skipping...")
+        img = None
 
-    # Update the displayed image
-    label.config(image=photo)
-    label.image = photo
+    if img:
+        img = img.resize((1600, 356))  # Adjust the image size as needed
+        photo = ImageTk.PhotoImage(img)
+
+        # Update the displayed image
+        label.config(image=photo)
+        label.image = photo
 
     # Schedule the display of the next image
     secondary.after(delay, create_gif_from_latest_pngs, delay, label, secondary, parent_folder, image_index + 1)
+    
+def enqueue_output(out_queue, display_queue, exit_event):
+    for line in iter(out_queue.get, None):  # Use get method with timeout to handle termination
+        line = line.replace("\r", "\n") 
+        display_queue.put(line)
+        if exit_event.is_set():
+            break
 
-def enqueue_output(out, queue, exit_event):
-    for line in iter(out.readline, b''):
-        if line != '':
-            queue.put(line)
-            if exit_event.is_set():  # Check if the exit event is set
-                break  # Exit the loop if the event is set
 
-    out.close()
-
-def show_realtime_output(command):
+def show_realtime_output(simulation_type_var):
     # Create a new window to display real-time output
     output_window = tk.Toplevel()
     output_window.title("Realtime Command Output")
@@ -65,22 +87,28 @@ def show_realtime_output(command):
     # Display initial message
     output_text.insert(tk.END, "The simulation is running. Please wait for the output. This may take a few seconds...\n")
 
-    # Use subprocess.PIPE to capture standard output in real-time
-    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1, universal_newlines=True)
+    # Créez deux queues pour la sortie standard et la sortie d'erreur
+    stdout_queue = multiprocessing.Queue()
+    stderr_queue = multiprocessing.Queue()
     
+    # Use subprocess.PIPE to capture standard output in real-time
+    process = multiprocessing.Process(target=run_with_queues, args=(simulation_type_var, stdout_queue, stderr_queue),daemon=True)
+
     # Store the process as an attribute of the secondary window
     output_window.process = process
 
     # Create a queue to store output lines
-    output_queue = queue.Queue()
+    output_queue = multiprocessing.Queue()
 
     # Create an event to signal the thread to exit
-    exit_event = threading.Event()
+    exit_event = multiprocessing.Event()
 
     # Create a thread to put output lines into the queue
-    output_thread = threading.Thread(target=enqueue_output, args=(process.stdout, output_queue, exit_event))
-    output_thread.daemon = True  # The thread terminates when the main program ends
+    output_thread = threading.Thread(target=enqueue_output, args=(stdout_queue, output_queue, exit_event))
+    output_thread.daemon = True
     output_thread.start()
+
+    process.start()
 
     # Read the queue and display the output in real-time
     def update_output():
@@ -91,16 +119,16 @@ def show_realtime_output(command):
         except queue.Empty:
             pass
 
-        if process.poll() is None:
+        if process.is_alive():
             # If the process is not finished, schedule the next update
             output_text.after(50, update_output)
             output_text.yview(tk.END)  # Scroll down to see the latest output
         else:
             # Display the final output
-            if process.returncode == 0:
+            if process.exitcode == 0:
                 output_text.insert(tk.END, f"\n\nSimulation finished with success !")
-            else: 
-                output_text.insert(tk.END, f"\n\nSimulation finished with an error, exit code: {process.returncode}")
+            else:
+                output_text.insert(tk.END, f"\n\nSimulation finished with an error, exit code: {process.exitcode}")
             output_text.yview(tk.END)  # Scroll down to see the latest output
             output_text.configure(state='disabled')  # Make the text area read-only
 
@@ -110,25 +138,33 @@ def show_realtime_output(command):
     # Function to kill the process when the secondary window is closed
     def on_close(): 
         exit_event.set()
-        output_window.process.kill()
+        output_window.process.terminate()
         output_window.destroy()
 
     # Set on_close function as the closing handler for the secondary window
     output_window.protocol("WM_DELETE_WINDOW", on_close)
 
-def execute_command(simulation_type_var):
-    # Actual running python path
-    python_executable = sys.executable
+def run_with_queues(simulation_type_var, stdout_queue, stderr_queue):
+    # Redirigez sys.stdout et sys.stderr vers les queues
+    sys.stdout = QueueAsFile(stdout_queue)
+    sys.stderr = QueueAsFile(stderr_queue)
 
-    # Build the command with the simulation type
-    command = f"{python_executable} lbm/start.py {simulation_type_var}"
+    try:
+         # Instanciate app
+        app = app_factory.create(simulation_type_var)
 
-    # Display the output in real-time in a secondary window
-    show_realtime_output(command)
-
+        # Instanciate lattice
+        ltc = lattice(app)
+        # Appelez votre fonction run normalement
+        run(ltc, app)
+    finally:
+        # Restaurez sys.stdout et sys.stderr pour éviter des problèmes potentiels
+        sys.stdout = sys.__stdout__
+        sys.stderr = sys.__stderr__
+        
 def start_simulation(simulation_type_var):
     # Create a thread to run the command in the background
-    thread = threading.Thread(target=execute_command, args=(simulation_type_var,))
+    thread = threading.Thread(target=show_realtime_output, args=(simulation_type_var,))
     thread.start()
 
 def show_result():
@@ -186,4 +222,5 @@ def main():
 
 # Call the main function if the script is run directly
 if __name__ == "__main__":
+    multiprocessing.freeze_support()
     main()

@@ -199,6 +199,7 @@ selected_simulation_type="array"
 def main():
     # Main window
     root = tk.CTk()
+    root.wm_iconbitmap('Images/Logo.ico')
     root.title("Simulation generator of CFD using LBM method")
 
     # Measure the title size

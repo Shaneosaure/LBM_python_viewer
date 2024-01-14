@@ -69,8 +69,8 @@ def enqueue_output(out_queue, display_queue, exit_event):
 def show_realtime_output(simulation_type_var):
     # Create a new window to display real-time output
     output_window = tk.Toplevel()
-    output_window.title("Realtime Command Output")
-
+    output_window.title(f"Realtime Command Output - {simulation_type_var}")
+    
     # Add a scrolling text widget to display real-time output
     output_text = scrolledtext.ScrolledText(output_window, wrap=tk.WORD, width=80, height=20)
     output_text.pack(expand=True, fill='both')

@@ -1,6 +1,11 @@
 name: Build and Release
-on: push
 
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -36,7 +41,7 @@ jobs:
         rm -r Demo 
         rm -r Images
         rm -r lbm/.github 
-        rm -r lbm/lbm/save 
+        rm -r lbm/save 
         rm -r build/
         rm -r dist/
         rm .gitignore 

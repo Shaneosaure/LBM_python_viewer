@@ -1,8 +1,6 @@
 # Basic imports
-import os
 import sys
 import threading
-import queue
 import io
 from pathlib import Path
 import multiprocessing
@@ -112,12 +110,9 @@ def show_realtime_output(simulation_type_var):
 
     # Read the queue and display the output in real-time
     def update_output():
-        try:
-            while True:
-                output_line = output_queue.get_nowait()
-                output_text.insert(tk.END, output_line)
-        except queue.Empty:
-            pass
+        while not output_queue.empty():
+            output_line = output_queue.get()
+            output_text.insert(tk.END, output_line)
 
         if process.is_alive():
             # If the process is not finished, schedule the next update

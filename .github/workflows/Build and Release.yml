@@ -25,15 +25,18 @@ jobs:
         git submodule update --init
         pip install -r lbm/requirements.txt
         pip install pyinstaller customtkinter
-
+    
+    - name: Move logo.ico to Inno Setup directory
+      run: |
+        mv Images/logo.ico .
+        
     - name: Build executable with PyInstaller
       run: |
-        pyinstaller --noconsole -i Images/logo.ico --onefile main.py
+        pyinstaller --noconsole -i logo.ico --onefile main.py
 
     - name: Move main.exe to Inno Setup directory
       run: |
         mv dist/main.exe .
-        cp Images/logo.ico .
         
     - name: Clean up files and folders
       run: |

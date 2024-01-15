@@ -26,10 +26,10 @@ DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 LicenseFile=LICENSE.txt
 PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
+PrivilegesRequiredOverridesAllowed=commandline
 OutputDir=Output
 OutputBaseFilename=LBM_python_viewer
-SetupIconFile=logo.ico
+SetupIconFile=Images/logo.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -62,3 +62,9 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+
+[UninstallDelete]
+Type: filesandordirs; Name: "{app}\lbm\*.*"
+Type: filesandordirs; Name: "{app}\results\*.*"
+
+

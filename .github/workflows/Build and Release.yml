@@ -33,7 +33,7 @@ jobs:
     - name: Move main.exe to Inno Setup directory
       run: |
         mv dist/main.exe .
-        mv Images/logo.ico .
+        cp Images/logo.ico .
         
     - name: Clean up files and folders
       run: |

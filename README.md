@@ -1,4 +1,5 @@
 # Project Name
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/numba)](#prerequisites)
 [![Build and Release](https://github.com/Shaneosaure/LBM_python_viewer/actions/workflows/Build%20and%20Release.yml/badge.svg)](https://github.com/Shaneosaure/LBM_python_viewer/actions/workflows/Build%20and%20Release.yml) 
 [![CodeQL](https://github.com/Shaneosaure/LBM_python_viewer/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/Shaneosaure/LBM_python_viewer/actions/workflows/github-code-scanning/codeql) 
 [![GitHub release (with filter)](https://img.shields.io/github/v/release/Shaneosaure/LBM_python_viewer)](https://github.com/Shaneosaure/LBM_python_viewer/releases/latest)
@@ -41,8 +42,7 @@ To set up the LBM Python Viewer, follow these steps:
 2. Initialize submodules:
 
    ```bash
-   git submodule init
-   git submodule update
+   git submodule update --init
    ```
 
 3. Install Python dependencies:

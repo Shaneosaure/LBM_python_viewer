@@ -49,8 +49,44 @@ class QueueAsFile(io.TextIOBase):
 width_label = None
 width_entry = None
 start_button = None
+gif_delay = 50 # gif_delay between each image (in milliseconds)
+    
+def export_to_gif_with_dialog(parent_folder):
+    parent_folder = Path(parent_folder)
+    input_folder = parent_folder / "png"
 
-def create_gif_from_latest_pngs(delay, label, secondary, parent_folder, image_index=0):
+    # Load all PNG images from the folder
+    png_files = sorted((filename for filename in input_folder.iterdir() if filename.suffix == ".png"),
+                       key=lambda x: int(''.join(filter(str.isdigit, x.name))))
+
+    if not png_files:
+        print("No images found for GIF export.")
+        return
+
+    # Create a list to store the images
+    images = []
+
+    for image_path in png_files:
+        try:
+            img = Image.open(image_path)
+            images.append(img)
+        except Image.UnidentifiedImageError:
+            print(f"Error opening image '{image_path}'. Skipping...")
+
+    if not images:
+        print("No valid images found for GIF export.")
+        return
+
+    # Ask the user to choose the destination folder for saving the GIF
+    save_path = tk.filedialog.asksaveasfilename(defaultextension=".gif", filetypes=[("GIF files", "*.gif")])
+    
+    if not save_path:
+        print("Operation canceled by the user.")
+        return
+    # Save the images as a GIF
+    images[0].save(save_path, save_all=True, append_images=images[1:], loop=0, duration=gif_delay)  # Adjust the duration as needed
+
+def loop_images(label, secondary, parent_folder, image_index=0):
     
     parent_folder=Path(parent_folder)
     input_folder = parent_folder / "png"
@@ -62,8 +98,8 @@ def create_gif_from_latest_pngs(delay, label, secondary, parent_folder, image_in
         # Display a message when no images are found
         label.configure(text="Images not created yet, wait a few more seconds...")
 
-        # Schedule the next check after a delay
-        secondary.after(delay, create_gif_from_latest_pngs, delay, label, secondary, parent_folder, image_index)
+        # Schedule the next check after a gif_delay
+        secondary.after(gif_delay, loop_images, label, secondary, parent_folder, image_index)
         return
 
     if image_index >= len(png_files):
@@ -85,8 +121,8 @@ def create_gif_from_latest_pngs(delay, label, secondary, parent_folder, image_in
         label.image = photo
 
     # Schedule the display of the next image
-    secondary.after(delay, create_gif_from_latest_pngs, delay, label, secondary, parent_folder, image_index + 1)
-    
+    secondary.after(gif_delay, loop_images, label, secondary, parent_folder, image_index + 1)
+
 def enqueue_output(out_queue, display_queue, exit_event):
     for line in iter(out_queue.get, None):  # Use get method with timeout to handle termination
         line = line.replace("\r", "\n") 
@@ -233,8 +269,6 @@ def start_simulation(selected_simulation_type):
     thread.start()
 
 def show_result(path,selected_simulation_type):
-    # Delay between each image (in milliseconds)
-    delay = 50  # Change this value to adjust the animation speed
     # Create a secondary window to display images
     secondary = tk.CTkToplevel()
     secondary.title(f"Simulation Result - {selected_simulation_type.get_type()}")
@@ -242,14 +276,16 @@ def show_result(path,selected_simulation_type):
     # Label to display the images
     label = tk.CTkLabel(secondary)
     label.pack()
-    create_gif_from_latest_pngs(delay, label, secondary,path)
-
+    loop_images(label, secondary,path)
+   # Button to start the simulation
+    test = tk.CTkButton(secondary, text="Export to GIF", command=lambda: export_to_gif_with_dialog(path))
+    test.pack(pady=10)  # Ajouter un espace de 10 pixels en dessous du bouton        
+    
 def on_width_change(event,selected_simulation_type):
     if event.widget.get == '':
         selected_simulation_type.set_width(float(0))
     else:
         selected_simulation_type.set_width(float(event.widget.get()))
-
 
 # Main function
 def main():

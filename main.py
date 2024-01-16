@@ -84,7 +84,7 @@ def export_to_gif_with_dialog(parent_folder):
         print("Operation canceled by the user.")
         return
     # Save the images as a GIF
-    images[0].save(save_path, save_all=True, append_images=images[1:], loop=0, duration=gif_delay)  # Adjust the duration as needed
+    images[0].save(save_path, save_all=True, append_images=images[1:], loop=0, duration=gif_delay*3)  # Adjust the duration as needed
 
 def loop_images(label, secondary, parent_folder, image_index=0):
     

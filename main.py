@@ -19,7 +19,6 @@ class Simulation_var:
     def __init__(self, type="array"):
         self.type = type
         self.width = None 
-        self.speed = None
 
     def set_type(self, type):
         self.type = type
@@ -35,13 +34,6 @@ class Simulation_var:
             return "Default value"
         return self.width
 
-    def set_speed(self, speed):
-        self.speed = speed
-
-    def get_speed(self):
-        if self.speed==None:
-            return "Default value"
-        return self.speed
 
 class QueueAsFile(io.TextIOBase):
     def __init__(self, queue):
@@ -56,8 +48,6 @@ class QueueAsFile(io.TextIOBase):
 # global variables declaration
 width_label = None
 width_entry = None
-speed_label = None
-speed_entry = None
 start_button = None
 
 def create_gif_from_latest_pngs(delay, label, secondary, parent_folder, image_index=0):
@@ -109,10 +99,10 @@ def show_realtime_output(selected_simulation_type):
     if selected_simulation_type.get_type() == "custom vent":
         # Create a new window to display real-time output
         output_window = tk.CTkToplevel()
-        output_window.title(f"Realtime Command Output - {selected_simulation_type.get_type()} - width {selected_simulation_type.get_width()} - speed {selected_simulation_type.get_speed()}")
+        output_window.title(f"Realtime Command Output - {selected_simulation_type.get_type()} - width {selected_simulation_type.get_width()}")
 
         # Add a label above the scrolling text widget
-        label = tk.CTkLabel(output_window, text=f"Live Solving Output: {selected_simulation_type.get_type()}\nwidth = {selected_simulation_type.get_width()}\nSpeed = {selected_simulation_type.get_speed()}", font=("Helvetica", 12, "bold"))
+        label = tk.CTkLabel(output_window, text=f"Live Solving Output: {selected_simulation_type.get_type()}\nwidth = {selected_simulation_type.get_width()}", font=("Helvetica", 12, "bold"))
         label.pack(pady=10)  # Add some padding between the label and the text widget
     else: 
         # Create a new window to display real-time output
@@ -205,15 +195,10 @@ def run_with_queues(selected_simulation_type, stdout_queue, stderr_queue, ltc_qu
         if selected_simulation_type.get_type()=="custom vent":
             # Get variables
             width = selected_simulation_type.get_width()
-            speed = selected_simulation_type.get_speed()
 
             # Instantiate app depending on conditions
-            if width != "Default value" and speed != "Default value":
-                app = vent(float(width), float(speed))
-            elif width != "Default value":
+            if width != "Default value":
                 app = vent(float(width))
-            elif speed != "Default value":
-                app = vent(u_lbm=float(speed))
             else:
                 app = vent()
 
@@ -265,12 +250,6 @@ def on_width_change(event,selected_simulation_type):
     else:
         selected_simulation_type.set_width(float(event.widget.get()))
 
-def on_speed_change(event,selected_simulation_type):
-    if event.widget.get == '':
-        selected_simulation_type.set_speed(float(0))
-    else:
-        selected_simulation_type.set_speed(float(event.widget.get()))
-
 
 # Main function
 def main():
@@ -280,7 +259,7 @@ def main():
 
     # Measure the title size
     title_width = root.winfo_reqwidth() * 3
-    title_height = root.winfo_reqheight() * 1.2
+    title_height = root.winfo_reqheight() * 1
 
     # Set the size of the main window based on the title size
     root.geometry(f"{title_width}x{title_height}")
@@ -302,8 +281,6 @@ def main():
         if width_label or width_entry:
             width_label.destroy()
             width_entry.destroy()
-            speed_label.destroy()
-            speed_entry.destroy()
             start_button.destroy()
         elif start_button:
             start_button.destroy()
@@ -315,13 +292,6 @@ def main():
             width_entry = tk.CTkEntry(master=root,placeholder_text="0.8")
             width_entry.bind("<KeyRelease>", lambda event: on_width_change(event, selected_simulation_type))
             width_entry.pack()
-
-            # Speed parameter
-            speed_label = tk.CTkLabel(root, text="Speed:")
-            speed_label.pack()
-            speed_entry = tk.CTkEntry(master=root,placeholder_text="0.05")
-            speed_entry.bind("<KeyRelease>", lambda event: on_speed_change(event, selected_simulation_type))
-            speed_entry.pack()
 
             # Button to start the simulation
             start_button = tk.CTkButton(root, text="Start simulation", command=lambda: start_simulation(selected_simulation_type))

@@ -15,6 +15,34 @@ from lbm.src.app.app      import *
 from lbm.src.core.lattice import *
 from lbm.src.core.run     import *
 
+class Simulation_var:
+    def __init__(self, type="array"):
+        self.type = type
+        self.width = None 
+        self.speed = None
+
+    def set_type(self, type):
+        self.type = type
+
+    def get_type(self):
+        return self.type 
+
+    def set_width(self, width):
+        self.width = width
+
+    def get_width(self):
+        if self.width==None:
+            return "Default value"
+        return self.width
+
+    def set_speed(self, speed):
+        self.speed = speed
+
+    def get_speed(self):
+        if self.speed==None:
+            return "Default value"
+        return self.speed
+
 class QueueAsFile(io.TextIOBase):
     def __init__(self, queue):
         self.queue = queue
@@ -24,6 +52,13 @@ class QueueAsFile(io.TextIOBase):
 
     def flush(self):
         pass  # Optional: if you need to flush
+
+# global variables declaration
+width_label = None
+width_entry = None
+speed_label = None
+speed_entry = None
+start_button = None
 
 def create_gif_from_latest_pngs(delay, label, secondary, parent_folder, image_index=0):
     
@@ -69,15 +104,24 @@ def enqueue_output(out_queue, display_queue, exit_event):
         if exit_event.is_set():
             break
 
-def show_realtime_output(simulation_type_var):
-    # Create a new window to display real-time output
-    output_window = tk.CTkToplevel()
-    output_window.title(f"Realtime Command Output - {simulation_type_var}")
-   
-    # Add a label above the scrolling text widget
-    label = tk.CTkLabel(output_window, text=f"Live Solving Output: {simulation_type_var}", font=("Helvetica", 12, "bold"))
-    label.pack(pady=10)  # Add some padding between the label and the text widget
+def show_realtime_output(selected_simulation_type):
+    
+    if selected_simulation_type.get_type() == "custom vent":
+        # Create a new window to display real-time output
+        output_window = tk.CTkToplevel()
+        output_window.title(f"Realtime Command Output - {selected_simulation_type.get_type()} - width {selected_simulation_type.get_width()} - speed {selected_simulation_type.get_speed()}")
 
+        # Add a label above the scrolling text widget
+        label = tk.CTkLabel(output_window, text=f"Live Solving Output: {selected_simulation_type.get_type()}\nwidth = {selected_simulation_type.get_width()}\nSpeed = {selected_simulation_type.get_speed()}", font=("Helvetica", 12, "bold"))
+        label.pack(pady=10)  # Add some padding between the label and the text widget
+    else: 
+        # Create a new window to display real-time output
+        output_window = tk.CTkToplevel()
+        output_window.title(f"Realtime Command Output - {selected_simulation_type.get_type()}")
+        
+        # Add a label above the scrolling text widget
+        label = tk.CTkLabel(output_window, text=f"Live Solving Output: {selected_simulation_type.get_type()}", font=("Helvetica", 12, "bold"))
+        label.pack(pady=10)  # Add some padding between the label and the text widget
 
     # Add a scrolling text widget to display real-time output
     output_text = scrolledtext.ScrolledText(output_window, wrap=tk.WORD, width=80, height=20)
@@ -95,7 +139,7 @@ def show_realtime_output(simulation_type_var):
     stderr_queue = multiprocessing.Queue()
     
     # Use subprocess.PIPE to capture standard output in real-time
-    process = multiprocessing.Process(target=run_with_queues, args=(simulation_type_var, stdout_queue, stderr_queue,ltc_queue),daemon=True)
+    process = multiprocessing.Process(target=run_with_queues, args=(selected_simulation_type, stdout_queue, stderr_queue,ltc_queue),daemon=True)
 
     # Store the process as an attribute of the secondary window
     output_window.process = process
@@ -136,7 +180,7 @@ def show_realtime_output(simulation_type_var):
             output_text.configure(state='disabled')  # Make the text area read-only
 
     # Créer un bouton "Show result" dans la fenêtre de sortie
-    show_result_button = tk.CTkButton(output_window, text="Show Result (slows down solving)", command=lambda: show_result(ltc.output_dir,simulation_type_var))
+    show_result_button = tk.CTkButton(output_window, text="Show Result (slows down solving)", command=lambda: show_result(ltc.output_dir,selected_simulation_type))
     # Créer un bouton "Show result" dans la fenêtre de sortie après une attente de 5 secondes
     output_window.after(3000, lambda: show_result_button.pack())
 
@@ -152,48 +196,81 @@ def show_realtime_output(simulation_type_var):
     # Set on_close function as the closing handler for the secondary window
     output_window.protocol("WM_DELETE_WINDOW", on_close)
 
-def run_with_queues(simulation_type_var, stdout_queue, stderr_queue, ltc_queue):
+def run_with_queues(selected_simulation_type, stdout_queue, stderr_queue, ltc_queue):
     # Redirigez sys.stdout et sys.stderr vers les queues
     sys.stdout = QueueAsFile(stdout_queue)
     sys.stderr = QueueAsFile(stderr_queue)
-
+    
     try:
-         # Instanciate app
-        app = app_factory.create(simulation_type_var)
+        if selected_simulation_type.get_type()=="custom vent":
+            # Get variables
+            width = selected_simulation_type.get_width()
+            speed = selected_simulation_type.get_speed()
 
-        # Instanciate lattice
-        ltc = lattice(app)
+            # Instantiate app depending on conditions
+            if width != "Default value" and speed != "Default value":
+                app = vent(float(width), float(speed))
+            elif width != "Default value":
+                app = vent(float(width))
+            elif speed != "Default value":
+                app = vent(u_lbm=float(speed))
+            else:
+                app = vent()
 
-        # Mettez la référence de ltc dans la file de sortie
-        ltc_queue.put(ltc)
+            # Instanciate lattice
+            ltc = lattice(app)
 
-        # Appelez votre fonction run normalement
-        run(ltc, app)
+            # Mettez la référence de ltc dans la file de sortie
+            ltc_queue.put(ltc)
+
+            # Run
+            run(ltc, app)
+        else:
+            # Instanciate app
+            app = app_factory.create(selected_simulation_type.get_type())
+
+            # Instanciate lattice
+            ltc = lattice(app)
+
+            # Mettez la référence de ltc dans la file de sortie
+            ltc_queue.put(ltc)
+
+            # Appelez votre fonction run normalement
+            run(ltc, app)
     finally:
         # Restaurez sys.stdout et sys.stderr pour éviter des problèmes potentiels
         sys.stdout = sys.__stdout__
         sys.stderr = sys.__stderr__
         
-def start_simulation(simulation_type_var):
+def start_simulation(selected_simulation_type):
     # Create a thread to run the command in the background
-    thread = threading.Thread(target=show_realtime_output, args=(simulation_type_var,))
+    thread = threading.Thread(target=show_realtime_output, args=(selected_simulation_type,))
     thread.start()
 
-def show_result(path,simulation_type_var):
+def show_result(path,selected_simulation_type):
     # Delay between each image (in milliseconds)
     delay = 50  # Change this value to adjust the animation speed
     # Create a secondary window to display images
     secondary = tk.CTkToplevel()
-    secondary.title(f"Simulation Result - {simulation_type_var}")
+    secondary.title(f"Simulation Result - {selected_simulation_type.get_type()}")
 
     # Label to display the images
     label = tk.CTkLabel(secondary)
     label.pack()
     create_gif_from_latest_pngs(delay, label, secondary,path)
 
+def on_width_change(event,selected_simulation_type):
+    if event.widget.get == '':
+        selected_simulation_type.set_width(float(0))
+    else:
+        selected_simulation_type.set_width(float(event.widget.get()))
 
+def on_speed_change(event,selected_simulation_type):
+    if event.widget.get == '':
+        selected_simulation_type.set_speed(float(0))
+    else:
+        selected_simulation_type.set_speed(float(event.widget.get()))
 
-selected_simulation_type="array"
 
 # Main function
 def main():
@@ -203,36 +280,61 @@ def main():
 
     # Measure the title size
     title_width = root.winfo_reqwidth() * 3
-    title_height = root.winfo_reqheight()
+    title_height = root.winfo_reqheight() * 1.2
 
     # Set the size of the main window based on the title size
     root.geometry(f"{title_width}x{title_height}")
 
     # Options for the dropdown menu
-    simulation_types = ["array","vent", "cavity", "poiseuille", "step","turek"]
+    simulation_types = ["array","vent", "custom vent","cavity", "poiseuille", "step","turek"]
 
     # Étiquette et menu déroulant pour le type de simulation
     simulation_type_label = tk.CTkLabel(root, text="Simulation type:")
     simulation_type_label.pack()
-
+      
     def on_simulation_type_change(choice):
-        global selected_simulation_type
-        selected_simulation_type=choice
-    
+        global width_label, width_entry, speed_entry, speed_label, start_button
+   
+        # Initialisation of Simulation_var
+        selected_simulation_type=Simulation_var()
+        selected_simulation_type.set_type(choice)
+       # Détruire l'ancien width_label s'il existe
+        if width_label or width_entry:
+            width_label.destroy()
+            width_entry.destroy()
+            speed_label.destroy()
+            speed_entry.destroy()
+            start_button.destroy()
+        elif start_button:
+            start_button.destroy()
+
+        if choice =="custom vent":
+            # Width of vent parameter
+            width_label = tk.CTkLabel(root, text="Vent width (between 0 and 4):")
+            width_label.pack()
+            width_entry = tk.CTkEntry(master=root,placeholder_text="0.8")
+            width_entry.bind("<KeyRelease>", lambda event: on_width_change(event, selected_simulation_type))
+            width_entry.pack()
+
+            # Speed parameter
+            speed_label = tk.CTkLabel(root, text="Speed:")
+            speed_label.pack()
+            speed_entry = tk.CTkEntry(master=root,placeholder_text="0.05")
+            speed_entry.bind("<KeyRelease>", lambda event: on_speed_change(event, selected_simulation_type))
+            speed_entry.pack()
+
+            # Button to start the simulation
+            start_button = tk.CTkButton(root, text="Start simulation", command=lambda: start_simulation(selected_simulation_type))
+            start_button.pack(pady=10)  # Ajouter un espace de 10 pixels en dessous du bouton        
+        else:
+            # Button to start the simulation
+            start_button = tk.CTkButton(root, text="Start simulation", command=lambda: start_simulation(selected_simulation_type))
+            start_button.pack(pady=10)  # Ajouter un espace de 10 pixels en dessous du bouton        
+            
     simulation_type_menu = tk.CTkOptionMenu(root,values=simulation_types,command=on_simulation_type_change)
     simulation_type_menu.pack()
-
-    # Entrée pour le rayon de l'objet
-    object_label = tk.CTkLabel(root, text="Object radius:")
-    object_label.pack()
-
-    object_entry = tk.CTkEntry(root)
-    object_entry.pack()
-
-    # Button to start the simulation
-    start_button = tk.CTkButton(root, text="Start simulation", command=lambda: start_simulation(selected_simulation_type))
-    start_button.pack()
-
+    
+    
     root.mainloop()
 
 # Call the main function if the script is run directly

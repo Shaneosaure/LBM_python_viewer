@@ -49,7 +49,6 @@ jobs:
         rm -r dist/
         rm .gitignore 
         rm .gitmodules 
-        rm test.py 
         rm README.md 
         rm lbm/.gitignore 
         rm lbm/LICENSE 

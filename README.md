@@ -1,4 +1,4 @@
-# Project Name
+# LBM Python Viewer
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/numba)](#prerequisites)
 [![Build and Release](https://github.com/Shaneosaure/LBM_python_viewer/actions/workflows/Build%20and%20Release.yml/badge.svg)](https://github.com/Shaneosaure/LBM_python_viewer/actions/workflows/Build%20and%20Release.yml) 
 [![CodeQL](https://github.com/Shaneosaure/LBM_python_viewer/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/Shaneosaure/LBM_python_viewer/actions/workflows/github-code-scanning/codeql) 

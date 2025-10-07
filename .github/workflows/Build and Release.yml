@@ -55,6 +55,11 @@ jobs:
         rm lbm/.gitignore 
         rm lbm/LICENSE 
         rm lbm/README.md 
+        
+    - name: Install Inno Setup
+      run: |
+        choco install innosetup --no-progress -y
+        echo "Inno Setup installed."
 
     - name: Run Inno Setup
       if: startsWith(github.ref, 'refs/tags/v')
